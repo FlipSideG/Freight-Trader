@@ -28,6 +28,12 @@ const freightRouteSchema = new mongoose.Schema({
     trim: true 
   },
   
+  // Origin port depth in meters
+  originPortDepth: { 
+    type: Number, 
+    default: null 
+  },
+  
   // Destination port/region
   destination: { 
     type: String, 
@@ -35,11 +41,18 @@ const freightRouteSchema = new mongoose.Schema({
     trim: true 
   },
   
+  // Destination port depth in meters
+  destinationPortDepth: { 
+    type: Number, 
+    default: null 
+  },
+  
   // Type of cargo (e.g., Clean, Dirty, Crude)
   cargoType: { 
     type: String, 
     required: true,
-    trim: true 
+    trim: true,
+    enum: ['clean', 'dirty', 'crude', 'other']
   },
   
   // Typical cargo size in metric tons
@@ -51,6 +64,12 @@ const freightRouteSchema = new mongoose.Schema({
   // Distance in nautical miles
   distance: { 
     type: Number,
+    default: null 
+  },
+  
+  // Typical voyage duration in days
+  typicalDuration: { 
+    type: Number, 
     default: null 
   },
   
@@ -117,5 +136,21 @@ freightRouteSchema.statics = {
     return this.findOne({ routeCode: routeCode.toUpperCase() });
   }
 };
+
+// Add pre-save validation for benchmark vessel
+freightRouteSchema.pre('save', function(next) {
+  if (this.benchmarkVessel && this.benchmarkVessel.type) {
+    if (!this.benchmarkVessel.size || this.benchmarkVessel.size <= 0) {
+      return next(new Error('Benchmark vessel size must be a positive number if type is specified'));
+    }
+    if (this.benchmarkVessel.consumption && this.benchmarkVessel.consumption < 0) {
+      return next(new Error('Benchmark vessel consumption cannot be negative'));
+    }
+  }
+  next();
+});
+
+// Add index for active routes
+freightRouteSchema.index({ isActive: 1, routeCode: 1 });
 
 module.exports = mongoose.model('FreightRoute', freightRouteSchema); 

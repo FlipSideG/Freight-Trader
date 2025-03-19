@@ -62,12 +62,20 @@ const freightRateSchema = new mongoose.Schema({
     default: null 
   },
   
+  // Flag to identify duplicate rates during scraping
+  isDuplicate: { 
+    type: Boolean, 
+    default: false, 
+    index: true 
+  },
+  
   // Source of the rate data
   source: { 
     type: String, 
     enum: ['manual', 'email', 'iceMessenger', 'ffaCurve', 'other'], 
     required: true,
-    default: 'manual' 
+    default: 'manual',
+    index: true 
   },
   
   // Flexible field for source-specific details
@@ -81,7 +89,8 @@ const freightRateSchema = new mongoose.Schema({
   // Create compound indexes for efficient querying
   indexes: [
     { routeId: 1, date: -1 }, // For getting latest rates for a route
-    { date: -1 } // For getting all rates on a specific date
+    { date: -1 }, // For getting all rates on a specific date
+    { source: 1, date: -1 } // For getting rates by source and date
   ]
 });
 
@@ -148,5 +157,16 @@ freightRateSchema.statics = {
       .lean();
   }
 };
+
+// Add pre-save validation hook for rate values
+freightRateSchema.pre('save', function(next) {
+  if (this.rateType === 'worldscale' && (this.rate < 0 || this.rate > 500)) {
+    return next(new Error('Worldscale rate must be between 0 and 500'));
+  }
+  if (this.rateType === 'usd' && this.rate < 0) {
+    return next(new Error('USD rate cannot be negative'));
+  }
+  next();
+});
 
 module.exports = mongoose.model('FreightRate', freightRateSchema); 

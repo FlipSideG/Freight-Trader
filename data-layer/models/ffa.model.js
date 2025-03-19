@@ -41,6 +41,12 @@ const routePriceSchema = new mongoose.Schema({
   tce: {
     type: Number,
     default: null
+  },
+
+  // Indicates if TCE is for a round trip
+  isRoundTrip: { 
+    type: Boolean, 
+    default: false 
   }
 }, { _id: false });
 
@@ -99,6 +105,25 @@ const ffaSchema = new mongoose.Schema({
   marketComments: {
     type: String,
     trim: true
+  },
+
+  // Flag to indicate if this is a live feed
+  isLive: { 
+    type: Boolean, 
+    default: false 
+  },
+
+  // Flag to identify duplicate entries during scraping
+  isDuplicate: { 
+    type: Boolean, 
+    default: false, 
+    index: true 
+  },
+
+  // Threshold for price movement alerts (percentage)
+  alertThreshold: { 
+    type: Number, 
+    default: null 
   },
   
   // Metadata and flags
@@ -171,5 +196,29 @@ ffaSchema.statics = {
       .lean();
   }
 };
+
+// Add pre-save validation for price fields
+ffaSchema.pre('save', function(next) {
+  if (this.routes && this.routes.length > 0) {
+    for (const route of this.routes) {
+      if (route.worldscale != null && route.worldscale < 0) {
+        return next(new Error('Worldscale price cannot be negative'));
+      }
+      if (route.dollarPerMT != null && route.dollarPerMT < 0) {
+        return next(new Error('Dollar per MT price cannot be negative'));
+      }
+      if (route.centsPerBBL != null && route.centsPerBBL < 0) {
+        return next(new Error('Cents per BBL price cannot be negative'));
+      }
+      if (route.tce != null && route.tce < 0) {
+        return next(new Error('TCE value cannot be negative'));
+      }
+    }
+  }
+  if (this.alertThreshold != null && this.alertThreshold < 0) {
+    return next(new Error('Alert threshold cannot be negative'));
+  }
+  next();
+});
 
 module.exports = mongoose.model('FFAPrice', ffaSchema); 
