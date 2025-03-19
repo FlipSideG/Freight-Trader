@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Freight Trader' %></title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <!-- Add any additional head elements here -->
+</head>
+<body>
+  <div class="app-container">
+    <header class="main-header">
+      <div class="logo">
+        <a href="/">
+          <img src="/img/logo.png" alt="Freight Trader Logo" class="logo-img">
+          <span class="logo-text">Freight Trader</span>
+        </a>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">Dashboard</a></li>
+          <li><a href="/freight-grid" class="<%= currentPage === 'freight-grid' ? 'active' : '' %>">Freight Grid</a></li>
+          <li><a href="/rates" class="<%= currentPage === 'rates' ? 'active' : '' %>">Rates</a></li>
+          <li><a href="/routes" class="<%= currentPage === 'routes' ? 'active' : '' %>">Routes</a></li>
+          <li><a href="/vessels" class="<%= currentPage === 'vessels' ? 'active' : '' %>">Vessels</a></li>
+          <li><a href="/ffa" class="<%= currentPage === 'ffa' ? 'active' : '' %>">FFA</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Search..." id="global-search">
+          <button type="button" class="search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 21L15.8033 15.8033M15.8033 15.8033C17.1605 14.4461 18 12.5711 18 10.5C18 6.35786 14.6421 3 10.5 3C6.35786 3 3 6.35786 3 10.5C3 14.6421 6.35786 18 10.5 18C12.5711 18 14.4461 17.1605 15.8033 15.8033Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="user-menu">
+          <img src="/img/user-avatar.png" alt="User" class="avatar">
+          <div class="user-dropdown">
+            <a href="/account">My Account</a>
+            <a href="/settings">Settings</a>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="sidebar">
+      <nav class="side-nav">
+        <div class="nav-group">
+          <h4>Market Data</h4>
+          <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/freight-grid">Freight Grid</a></li>
+            <li><a href="/ffa">FFA Prices</a></li>
+          </ul>
+        </div>
+        
+        <div class="nav-group">
+          <h4>Data Management</h4>
+          <ul>
+            <li><a href="/rates">Rates</a></li>
+            <li><a href="/routes">Routes</a></li>
+            <li><a href="/vessels">Vessels</a></li>
+          </ul>
+        </div>
+        
+        <div class="nav-group">
+          <h4>Operations</h4>
+          <ul>
+            <li><a href="/voyages">Voyages</a></li>
+            <li><a href="/fixtures">Fixtures</a></li>
+            <li><a href="/port-info">Port Information</a></li>
+          </ul>
+        </div>
+        
+        <div class="nav-group">
+          <h4>Admin</h4>
+          <ul>
+            <li><a href="/settings">Settings</a></li>
+            <li><a href="/users">Users</a></li>
+            <li><a href="/data-sources">Data Sources</a></li>
+          </ul>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="app-version">Version 1.0.0</div>
+        <a href="/support" class="support-link">Support</a>
+      </div>
+    </div>
+
+    <main class="content">
+      <div class="page-header">
+        <h1><%= pageTitle || 'Dashboard' %></h1>
+        <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs.length > 0) { %>
+          <div class="breadcrumbs">
+            <% breadcrumbs.forEach((crumb, index) => { %>
+              <% if (index < breadcrumbs.length - 1) { %>
+                <a href="<%= crumb.url %>"><%= crumb.label %></a>
+                <span class="breadcrumb-separator">/</span>
+              <% } else { %>
+                <span class="breadcrumb-current"><%= crumb.label %></span>
+              <% } %>
+            <% }); %>
+          </div>
+        <% } %>
+        
+        <% if (typeof pageActions !== 'undefined' && pageActions.length > 0) { %>
+          <div class="page-actions">
+            <% pageActions.forEach(action => { %>
+              <a href="<%= action.url %>" class="btn <%= action.class || '' %>">
+                <% if (action.icon) { %>
+                  <span class="action-icon"><%= action.icon %></span>
+                <% } %>
+                <%= action.label %>
+              </a>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+      
+      <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+        <div class="message-container">
+          <% messages.forEach(message => { %>
+            <div class="message <%= message.type %>">
+              <% if (message.type === 'success') { %>
+                <svg viewBox="0 0 24 24" width="16" height="16" class="message-icon">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
+                </svg>
+              <% } else if (message.type === 'error') { %>
+                <svg viewBox="0 0 24 24" width="16" height="16" class="message-icon">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                </svg>
+              <% } else if (message.type === 'warning') { %>
+                <svg viewBox="0 0 24 24" width="16" height="16" class="message-icon">
+                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/>
+                </svg>
+              <% } else if (message.type === 'info') { %>
+                <svg viewBox="0 0 24 24" width="16" height="16" class="message-icon">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
+                </svg>
+              <% } %>
+              <%= message.text %>
+              <button type="button" class="message-close">&times;</button>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+      
+      <div class="page-content">
+        <%- body %>
+      </div>
+    </main>
+  </div>
+
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <img src="/img/logo-small.png" alt="Freight Trader" class="footer-logo-img">
+        <span>Freight Trader</span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/contact">Contact Us</a>
+      </div>
+      <div class="footer-copyright">
+        &copy; <%= new Date().getFullYear() %> Freight Trader. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <!-- Add any additional scripts here -->
+</body>
+</html> 

@@ -1,0 +1,94 @@
+<div class="error-page">
+  <div class="error-icon">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+    </svg>
+  </div>
+  
+  <h1 class="error-title">
+    <% if (error && error.status) { %>
+      <%= error.status %> Error
+    <% } else { %>
+      Error
+    <% } %>
+  </h1>
+  
+  <div class="error-message">
+    <%= message %>
+  </div>
+  
+  <% if (process.env.NODE_ENV !== 'production' && error && error.stack) { %>
+    <div class="error-stack">
+      <div class="stack-header">Stack Trace:</div>
+      <pre class="stack-trace"><%= error.stack %></pre>
+    </div>
+  <% } %>
+  
+  <div class="error-actions">
+    <a href="/" class="btn">Back to Home</a>
+    <button class="btn btn-secondary" onclick="window.history.back()">Go Back</button>
+  </div>
+</div>
+
+<style>
+  .error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .error-icon {
+    color: var(--error-color);
+    margin-bottom: 1.5rem;
+  }
+  
+  .error-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--error-color);
+  }
+  
+  .error-message {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+  }
+  
+  .error-stack {
+    width: 100%;
+    margin: 1.5rem 0;
+    text-align: left;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 1rem;
+  }
+  
+  .stack-header {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-light);
+  }
+  
+  .stack-trace {
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 0.875rem;
+    color: var(--text-light);
+    overflow-x: auto;
+    margin: 0;
+  }
+  
+  .error-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+</style> 

@@ -1,0 +1,248 @@
+<div class="route-header">
+  <div class="route-code-badge"><%= route.routeCode %></div>
+  <h3 class="route-name"><%= route.name %></h3>
+  <div class="route-status <%= route.isActive ? 'active' : 'inactive' %>">
+    <%= route.isActive ? 'Active' : 'Inactive' %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <h3>Route Details</h3>
+      <dl class="detail-list">
+        <dt>Origin</dt>
+        <dd><%= route.origin %></dd>
+        
+        <dt>Destination</dt>
+        <dd><%= route.destination %></dd>
+        
+        <dt>Cargo Type</dt>
+        <dd><%= route.cargoType %></dd>
+        
+        <dt>Quantity</dt>
+        <dd><%= route.quantity ? `${(route.quantity/1000).toFixed(0)}K MT` : 'N/A' %></dd>
+        
+        <dt>Distance</dt>
+        <dd><%= route.distance ? `${route.distance.toLocaleString()} NM` : 'N/A' %></dd>
+        
+        <% if (route.canalPassages && route.canalPassages.length > 0) { %>
+          <dt>Canal Passages</dt>
+          <dd>
+            <ul class="canal-list">
+              <% route.canalPassages.forEach(canal => { %>
+                <li><%= canal.name %> (<%= canal.direction %>)</li>
+              <% }) %>
+            </ul>
+          </dd>
+        <% } %>
+      </dl>
+    </div>
+    
+    <div class="card">
+      <h3>Benchmark Vessel</h3>
+      <% if (route.benchmarkVessel) { %>
+        <dl class="detail-list">
+          <dt>Type</dt>
+          <dd><%= route.benchmarkVessel.type || 'N/A' %></dd>
+          
+          <dt>Size</dt>
+          <dd><%= route.benchmarkVessel.size ? `${route.benchmarkVessel.size.toLocaleString()} DWT` : 'N/A' %></dd>
+          
+          <dt>Consumption</dt>
+          <dd><%= route.benchmarkVessel.consumption ? `${route.benchmarkVessel.consumption} MT/day` : 'N/A' %></dd>
+        </dl>
+      <% } else { %>
+        <p>No benchmark vessel information available.</p>
+      <% } %>
+    </div>
+    
+    <% if (route.notes) { %>
+      <div class="card">
+        <h3>Notes</h3>
+        <p><%= route.notes %></p>
+      </div>
+    <% } %>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <h3>Current Rate</h3>
+      <% if (currentRate) { %>
+        <div class="current-rate">
+          <div class="rate-value">
+            <% if (currentRate.rateType === 'worldscale') { %>
+              <span class="rate-number">WS <%= currentRate.rate %></span>
+            <% } else { %>
+              <span class="rate-number">$<%= (currentRate.rate/1000).toFixed(0) %>K</span>
+            <% } %>
+            <span class="rate-change <%= currentRate.change > 0 ? 'positive' : currentRate.change < 0 ? 'negative' : '' %>">
+              <%= currentRate.change > 0 ? '+' : '' %><%= currentRate.change %>
+            </span>
+          </div>
+          
+          <div class="tce-values">
+            <div class="tce-box non-eco">
+              <div class="tce-label">Non-Eco</div>
+              <div class="tce-value">$<%= currentRate.tceNonEco ? currentRate.tceNonEco.toLocaleString() : 'N/A' %></div>
+            </div>
+            <div class="tce-box eco">
+              <div class="tce-label">Eco</div>
+              <div class="tce-value">$<%= currentRate.tceEco ? currentRate.tceEco.toLocaleString() : 'N/A' %></div>
+            </div>
+            <div class="tce-box scrubber">
+              <div class="tce-label">Scrubber</div>
+              <div class="tce-value">$<%= currentRate.tceScrubber ? currentRate.tceScrubber.toLocaleString() : 'N/A' %></div>
+            </div>
+          </div>
+          
+          <div class="rate-date">
+            As of <%= new Date(currentRate.date).toLocaleString() %>
+          </div>
+        </div>
+      <% } else { %>
+        <p>No current rate information available.</p>
+      <% } %>
+    </div>
+    
+    <div class="card">
+      <h3>Rate History</h3>
+      <% if (rateHistory && rateHistory.length > 0) { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Rate</th>
+              <th>Change</th>
+              <th>TCE (Non-Eco)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rateHistory.forEach(rate => { %>
+              <tr>
+                <td><%= new Date(rate.date).toLocaleDateString() %></td>
+                <td>
+                  <% if (rate.rateType === 'worldscale') { %>
+                    WS <%= rate.rate %>
+                  <% } else { %>
+                    $<%= (rate.rate/1000).toFixed(0) %>K
+                  <% } %>
+                </td>
+                <td class="<%= rate.change > 0 ? 'positive' : rate.change < 0 ? 'negative' : '' %>">
+                  <%= rate.change > 0 ? '+' : '' %><%= rate.change %>
+                </td>
+                <td>$<%= rate.tceNonEco ? rate.tceNonEco.toLocaleString() : 'N/A' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p>No rate history available.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .route-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .route-code-badge {
+    background-color: #1e3a8a;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+  
+  .route-name {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .route-status {
+    margin-left: auto;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+  
+  .route-status.active {
+    background-color: #e6ffee;
+    color: #0d7040;
+  }
+  
+  .route-status.inactive {
+    background-color: #ffe6e6;
+    color: #a02020;
+  }
+  
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.75rem;
+  }
+  
+  .col-md-6 {
+    flex: 0 0 100%;
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .col-md-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+  
+  .detail-list {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.5rem 1rem;
+    margin: 0;
+  }
+  
+  .detail-list dt {
+    font-weight: 600;
+    color: #666;
+  }
+  
+  .detail-list dd {
+    margin: 0;
+  }
+  
+  .canal-list {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .current-rate {
+    padding: 1rem;
+    background-color: #f2f7ff;
+    border-radius: 8px;
+  }
+  
+  .rate-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 1rem;
+  }
+  
+  .rate-change {
+    font-size: 1.25rem;
+    margin-left: 0.5rem;
+  }
+  
+  .rate-date {
+    text-align: right;
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 1rem;
+  }
+</style> 

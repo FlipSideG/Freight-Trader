@@ -1,0 +1,133 @@
+<div class="filters">
+  <h3>Filters</h3>
+  <form action="/vessels" method="GET">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="vessel-type">Vessel Type</label>
+        <select name="vesselType" id="vessel-type">
+          <option value="all" <%= !vesselType || vesselType === 'all' ? 'selected' : '' %>>All Types</option>
+          <option value="VLCC" <%= vesselType === 'VLCC' ? 'selected' : '' %>>VLCC</option>
+          <option value="Suezmax" <%= vesselType === 'Suezmax' ? 'selected' : '' %>>Suezmax</option>
+          <option value="Aframax" <%= vesselType === 'Aframax' ? 'selected' : '' %>>Aframax</option>
+          <option value="LR2" <%= vesselType === 'LR2' ? 'selected' : '' %>>LR2</option>
+          <option value="LR1" <%= vesselType === 'LR1' ? 'selected' : '' %>>LR1</option>
+          <option value="MR" <%= vesselType === 'MR' ? 'selected' : '' %>>MR</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="build-year">Built After</label>
+        <input type="number" name="builtAfter" id="build-year" value="<%= builtAfter || '' %>" placeholder="e.g. 2010">
+      </div>
+      
+      <div class="filter-group">
+        <label for="search">Search</label>
+        <input type="text" name="search" id="search" value="<%= search || '' %>" placeholder="Vessel name, IMO, or Owner">
+      </div>
+      
+      <button type="submit" class="btn">Apply Filters</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Vessels <small>(<%= vessels.length %> vessels)</small></h3>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>IMO</th>
+        <th>Type</th>
+        <th>Built</th>
+        <th>DWT</th>
+        <th>Owner</th>
+        <th>Flag</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (vessels && vessels.length > 0) { %>
+        <% vessels.forEach(vessel => { %>
+          <tr>
+            <td><strong><%= vessel.name %></strong></td>
+            <td><%= vessel.imo %></td>
+            <td><%= vessel.type || 'N/A' %></td>
+            <td><%= vessel.built || 'N/A' %></td>
+            <td><%= vessel.dwt ? vessel.dwt.toLocaleString() : 'N/A' %></td>
+            <td><%= vessel.owner || 'N/A' %></td>
+            <td>
+              <% if (vessel.flag) { %>
+                <%= vessel.flag %>
+              <% } else { %>
+                N/A
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="7">No vessels found</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+  
+  <% if (totalCount > vessels.length) { %>
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing <%= skip + 1 %>-<%= Math.min(skip + limit, totalCount) %> of <%= totalCount %>
+      </div>
+      <div class="pagination-controls">
+        <% if (skip > 0) { %>
+          <a href="/vessels?<%= paginationQuery %>&skip=<%= Math.max(0, skip - limit) %>" class="btn btn-sm">Previous</a>
+        <% } %>
+        <% if (skip + limit < totalCount) { %>
+          <a href="/vessels?<%= paginationQuery %>&skip=<%= skip + limit %>" class="btn btn-sm">Next</a>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .filter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+  }
+  
+  .filter-group label {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .filter-group select,
+  .filter-group input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+</style> 

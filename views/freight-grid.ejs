@@ -1,0 +1,184 @@
+<div class="filters">
+  <h3>Filters</h3>
+  <form action="/freight-grid" method="GET">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="vessel-type">Vessel Type</label>
+        <select name="vesselType" id="vessel-type">
+          <option value="all" <%= !vesselType || vesselType === 'all' ? 'selected' : '' %>>All Types</option>
+          <option value="VLCC" <%= vesselType === 'VLCC' ? 'selected' : '' %>>VLCC</option>
+          <option value="Suezmax" <%= vesselType === 'Suezmax' ? 'selected' : '' %>>Suezmax</option>
+          <option value="Aframax" <%= vesselType === 'Aframax' ? 'selected' : '' %>>Aframax</option>
+          <option value="LR2" <%= vesselType === 'LR2' ? 'selected' : '' %>>LR2</option>
+          <option value="LR1" <%= vesselType === 'LR1' ? 'selected' : '' %>>LR1</option>
+          <option value="MR" <%= vesselType === 'MR' ? 'selected' : '' %>>MR</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="cargo-type">Cargo Type</label>
+        <select name="cargoType" id="cargo-type">
+          <option value="all" <%= !cargoType || cargoType === 'all' ? 'selected' : '' %>>All Types</option>
+          <option value="Crude Oil" <%= cargoType === 'Crude Oil' ? 'selected' : '' %>>Crude Oil</option>
+          <option value="Clean Petroleum Products" <%= cargoType === 'Clean Petroleum Products' ? 'selected' : '' %>>Clean Products</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="tce-type">TCE Display</label>
+        <select name="tceType" id="tce-type">
+          <option value="nonEco" <%= !tceType || tceType === 'nonEco' ? 'selected' : '' %>>Non-Eco</option>
+          <option value="eco" <%= tceType === 'eco' ? 'selected' : '' %>>Eco</option>
+          <option value="scrubber" <%= tceType === 'scrubber' ? 'selected' : '' %>>Scrubber</option>
+          <option value="all" <%= tceType === 'all' ? 'selected' : '' %>>All</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn">Apply Filters</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Freight Grid <small>As of <%= today %></small></h3>
+  
+  <% if (rates && rates.length > 0) { %>
+    <div class="grid-container">
+      <% rates.forEach(rate => { %>
+        <div class="route-card">
+          <h3><%= rate.route.routeCode %></h3>
+          <div class="route-info">
+            <span><%= rate.route.name %></span>
+          </div>
+          <div class="route-info">
+            <span><strong>Type:</strong> <%= rate.route.benchmarkVessel?.type || 'N/A' %></span>
+            <span><strong>Cargo:</strong> <%= rate.route.cargoType || 'N/A' %></span>
+          </div>
+          <div class="route-info">
+            <span><strong>Quantity:</strong> <%= rate.quantity ? `${(rate.quantity/1000).toFixed(0)}K MT` : 'N/A' %></span>
+          </div>
+          
+          <div class="route-stats">
+            <div class="rate-box">
+              <div class="rate-label">Current Rate:</div>
+              <div class="rate-value">
+                <% if (rate.rateType === 'worldscale') { %>
+                  <strong>WS <%= rate.rate %></strong>
+                  <span class="rate-change <%= rate.change > 0 ? 'positive' : rate.change < 0 ? 'negative' : '' %>">
+                    <%= rate.change > 0 ? '+' : '' %><%= rate.change %>
+                  </span>
+                <% } else { %>
+                  <strong>$<%= (rate.rate/1000).toFixed(0) %>K</strong>
+                  <span class="rate-change <%= rate.change > 0 ? 'positive' : rate.change < 0 ? 'negative' : '' %>">
+                    <%= rate.change > 0 ? '+' : '' %>$<%= (rate.change/1000).toFixed(0) %>K
+                  </span>
+                <% } %>
+              </div>
+            </div>
+            
+            <% if (tceType === 'all') { %>
+              <div class="tce-values">
+                <div class="tce-box non-eco">
+                  <div class="tce-label">Non-Eco</div>
+                  <div class="tce-value">$<%= rate.tceNonEco ? rate.tceNonEco.toLocaleString() : 'N/A' %></div>
+                </div>
+                <div class="tce-box eco">
+                  <div class="tce-label">Eco</div>
+                  <div class="tce-value">$<%= rate.tceEco ? rate.tceEco.toLocaleString() : 'N/A' %></div>
+                </div>
+                <div class="tce-box scrubber">
+                  <div class="tce-label">Scrubber</div>
+                  <div class="tce-value">$<%= rate.tceScrubber ? rate.tceScrubber.toLocaleString() : 'N/A' %></div>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="tce-values single">
+                <div class="tce-box <%= tceType %>">
+                  <div class="tce-label">TCE (<%= tceType === 'nonEco' ? 'Non-Eco' : tceType === 'eco' ? 'Eco' : 'Scrubber' %>)</div>
+                  <div class="tce-value">
+                    $<%= 
+                      tceType === 'nonEco' ? (rate.tceNonEco ? rate.tceNonEco.toLocaleString() : 'N/A') :
+                      tceType === 'eco' ? (rate.tceEco ? rate.tceEco.toLocaleString() : 'N/A') :
+                      (rate.tceScrubber ? rate.tceScrubber.toLocaleString() : 'N/A')
+                    %>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            
+            <div class="updated-at">
+              <small>Updated: <%= new Date(rate.date).toLocaleString() %></small>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <p>No freight rates available. Please check your filters or try again later.</p>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .filter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+  }
+  
+  .filter-group label {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .rate-box {
+    margin-bottom: 0.75rem;
+  }
+  
+  .rate-label {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .rate-value {
+    font-size: 1.2rem;
+  }
+  
+  .rate-change {
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+  }
+  
+  .tce-values.single .tce-box {
+    width: 100%;
+    margin: 0;
+  }
+  
+  .updated-at {
+    margin-top: 0.5rem;
+    text-align: right;
+    color: #666;
+  }
+  
+  .empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+  }
+</style> 

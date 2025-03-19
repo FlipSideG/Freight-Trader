@@ -1,0 +1,179 @@
+<div class="filters">
+  <h3>Filters</h3>
+  <form action="/ffa" method="GET">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="contract-month">Contract Month</label>
+        <select name="contractMonth" id="contract-month">
+          <option value="all" <%= !contractMonth || contractMonth === 'all' ? 'selected' : '' %>>All Months</option>
+          <% if (contractMonths && contractMonths.length > 0) { %>
+            <% contractMonths.forEach(month => { %>
+              <option value="<%= month %>" <%= contractMonth === month ? 'selected' : '' %>>
+                <%= month %>
+              </option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="route-code">Route</label>
+        <select name="routeCode" id="route-code">
+          <option value="all" <%= !routeCode || routeCode === 'all' ? 'selected' : '' %>>All Routes</option>
+          <% if (routeCodes && routeCodes.length > 0) { %>
+            <% routeCodes.forEach(code => { %>
+              <option value="<%= code %>" <%= routeCode === code ? 'selected' : '' %>>
+                <%= code %>
+              </option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-from">From Date</label>
+        <input type="date" name="startDate" id="date-from" value="<%= startDate || '' %>">
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-to">To Date</label>
+        <input type="date" name="endDate" id="date-to" value="<%= endDate || '' %>">
+      </div>
+      
+      <button type="submit" class="btn">Apply Filters</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>FFA Prices <small>(<%= ffaPrices.length %> records)</small></h3>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Contract Month</th>
+        <th>Date</th>
+        <th>Routes</th>
+        <th>Market Comments</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (ffaPrices && ffaPrices.length > 0) { %>
+        <% ffaPrices.forEach(ffa => { %>
+          <tr>
+            <td><strong><%= ffa.contractMonth %></strong></td>
+            <td><%= new Date(ffa.dateRecorded).toLocaleDateString() %></td>
+            <td>
+              <% if (ffa.routes && ffa.routes.length > 0) { %>
+                <div class="route-grid">
+                  <% ffa.routes.slice(0, 5).forEach(route => { %>
+                    <div class="route-item">
+                      <span class="badge badge-primary"><%= route.routeCode %></span>
+                      <% if (route.worldscale) { %>WS <%= route.worldscale %><% } %>
+                      <% if (route.dollarPerMT) { %>$<%= route.dollarPerMT %>/MT<% } %>
+                    </div>
+                  <% }) %>
+                </div>
+                <% if (ffa.routes.length > 5) { %>
+                  <small>+ <%= ffa.routes.length - 5 %> more</small>
+                <% } %>
+              <% } else { %>
+                No routes available
+              <% } %>
+            </td>
+            <td>
+              <% if (ffa.marketComments) { %>
+                <div class="comments">
+                  <%= ffa.marketComments.length > 100 ? ffa.marketComments.substring(0, 100) + '...' : ffa.marketComments %>
+                </div>
+              <% } else { %>
+                No comments
+              <% } %>
+            </td>
+            <td><%= ffa.dataSource %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="5">No FFA prices found</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+  
+  <% if (totalCount > ffaPrices.length) { %>
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing <%= skip + 1 %>-<%= Math.min(skip + limit, totalCount) %> of <%= totalCount %>
+      </div>
+      <div class="pagination-controls">
+        <% if (skip > 0) { %>
+          <a href="/ffa?<%= paginationQuery %>&skip=<%= Math.max(0, skip - limit) %>" class="btn btn-sm">Previous</a>
+        <% } %>
+        <% if (skip + limit < totalCount) { %>
+          <a href="/ffa?<%= paginationQuery %>&skip=<%= skip + limit %>" class="btn btn-sm">Next</a>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .filter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+  }
+  
+  .filter-group label {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .filter-group select,
+  .filter-group input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .route-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .route-item {
+    font-size: 0.9rem;
+  }
+  
+  .comments {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+</style> 

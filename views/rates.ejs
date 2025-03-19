@@ -1,0 +1,182 @@
+<div class="filters">
+  <h3>Filters</h3>
+  <form action="/rates" method="GET">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="route">Route</label>
+        <select name="routeCode" id="route">
+          <option value="all" <%= !routeCode || routeCode === 'all' ? 'selected' : '' %>>All Routes</option>
+          <% if (routes && routes.length > 0) { %>
+            <% routes.forEach(route => { %>
+              <option value="<%= route.routeCode %>" <%= routeCode === route.routeCode ? 'selected' : '' %>>
+                <%= route.routeCode %> - <%= route.name %>
+              </option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-from">From Date</label>
+        <input type="date" name="startDate" id="date-from" value="<%= startDate || '' %>">
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-to">To Date</label>
+        <input type="date" name="endDate" id="date-to" value="<%= endDate || '' %>">
+      </div>
+      
+      <button type="submit" class="btn">Apply Filters</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Freight Rates <small>(<%= rates.length %> records)</small></h3>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Route</th>
+        <th>Date</th>
+        <th>Rate</th>
+        <th>Change</th>
+        <th>TCE (Non-Eco)</th>
+        <th>TCE (Eco)</th>
+        <th>TCE (Scrubber)</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (rates && rates.length > 0) { %>
+        <% rates.forEach(rate => { %>
+          <tr>
+            <td>
+              <% if (rate.routeId && typeof rate.routeId === 'object') { %>
+                <strong><%= rate.routeId.routeCode %></strong><br>
+                <small><%= rate.routeId.name %></small>
+              <% } else { %>
+                <strong>N/A</strong>
+              <% } %>
+            </td>
+            <td><%= new Date(rate.date).toLocaleDateString() %></td>
+            <td>
+              <% if (rate.rateType === 'worldscale') { %>
+                WS <%= rate.rate %>
+              <% } else { %>
+                $<%= (rate.rate/1000).toFixed(0) %>K
+              <% } %>
+            </td>
+            <td class="<%= rate.change > 0 ? 'positive' : rate.change < 0 ? 'negative' : '' %>">
+              <%= rate.change > 0 ? '+' : '' %><%= rate.change %>
+            </td>
+            <td>$<%= rate.tceNonEco ? rate.tceNonEco.toLocaleString() : 'N/A' %></td>
+            <td>$<%= rate.tceEco ? rate.tceEco.toLocaleString() : 'N/A' %></td>
+            <td>$<%= rate.tceScrubber ? rate.tceScrubber.toLocaleString() : 'N/A' %></td>
+            <td><span class="badge source-<%= rate.source %>"><%= rate.source %></span></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="8">No rates found</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+  
+  <% if (totalCount > rates.length) { %>
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing <%= skip + 1 %>-<%= Math.min(skip + limit, totalCount) %> of <%= totalCount %>
+      </div>
+      <div class="pagination-controls">
+        <% if (skip > 0) { %>
+          <a href="/rates?<%= paginationQuery %>&skip=<%= Math.max(0, skip - limit) %>" class="btn btn-sm">Previous</a>
+        <% } %>
+        <% if (skip + limit < totalCount) { %>
+          <a href="/rates?<%= paginationQuery %>&skip=<%= skip + limit %>" class="btn btn-sm">Next</a>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .filter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+  }
+  
+  .filter-group label {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .filter-group select,
+  .filter-group input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .positive {
+    color: green;
+  }
+  
+  .negative {
+    color: red;
+  }
+  
+  .badge {
+    text-transform: capitalize;
+  }
+  
+  .source-manual {
+    background-color: #e6f0ff;
+    color: #1e3a8a;
+  }
+  
+  .source-email {
+    background-color: #e6ffee;
+    color: #0d7040;
+  }
+  
+  .source-iceMessenger {
+    background-color: #fff8e6;
+    color: #8a5a00;
+  }
+  
+  .source-ffaCurve {
+    background-color: #ffe6f0;
+    color: #8a0060;
+  }
+  
+  .source-other {
+    background-color: #f0f0f0;
+    color: #666;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+</style> 

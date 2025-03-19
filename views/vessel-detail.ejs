@@ -1,0 +1,320 @@
+<div class="vessel-header">
+  <h2><%= vessel.name %></h2>
+  <div class="vessel-status <%= vessel.status === 'active' ? 'active' : 'inactive' %>">
+    <%= vessel.status === 'active' ? 'Active' : 'Inactive' %>
+  </div>
+</div>
+
+<div class="vessel-detail-grid">
+  <!-- Main vessel information -->
+  <div class="card">
+    <h3>Vessel Details</h3>
+    <div class="detail-row">
+      <div class="detail-label">IMO Number</div>
+      <div class="detail-value"><%= vessel.imo || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Vessel Type</div>
+      <div class="detail-value"><%= vessel.type || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Built</div>
+      <div class="detail-value"><%= vessel.built || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Flag</div>
+      <div class="detail-value"><%= vessel.flag || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Owner</div>
+      <div class="detail-value"><%= vessel.owner || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Manager</div>
+      <div class="detail-value"><%= vessel.manager || 'N/A' %></div>
+    </div>
+  </div>
+
+  <!-- Technical specifications -->
+  <div class="card">
+    <h3>Technical Specifications</h3>
+    <div class="detail-row">
+      <div class="detail-label">Deadweight</div>
+      <div class="detail-value"><%= vessel.dwt ? vessel.dwt.toLocaleString() + ' MT' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Gross Tonnage</div>
+      <div class="detail-value"><%= vessel.grossTonnage ? vessel.grossTonnage.toLocaleString() + ' GT' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Length Overall</div>
+      <div class="detail-value"><%= vessel.length ? vessel.length + ' m' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Beam</div>
+      <div class="detail-value"><%= vessel.beam ? vessel.beam + ' m' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Draft</div>
+      <div class="detail-value"><%= vessel.draft ? vessel.draft + ' m' : 'N/A' %></div>
+    </div>
+  </div>
+
+  <!-- Consumption and performance -->
+  <div class="card">
+    <h3>Consumption & Performance</h3>
+    <div class="detail-row">
+      <div class="detail-label">Design Speed</div>
+      <div class="detail-value"><%= vessel.designSpeed ? vessel.designSpeed + ' knots' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Consumption (Laden)</div>
+      <div class="detail-value"><%= vessel.consumptionLaden ? vessel.consumptionLaden + ' MT/day' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Consumption (Ballast)</div>
+      <div class="detail-value"><%= vessel.consumptionBallast ? vessel.consumptionBallast + ' MT/day' : 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Eco Type</div>
+      <div class="detail-value"><%= vessel.ecoType || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Scrubber Fitted</div>
+      <div class="detail-value"><%= vessel.scrubber ? 'Yes' : 'No' %></div>
+    </div>
+  </div>
+
+  <!-- Position and status -->
+  <div class="card">
+    <h3>Current Position & Status</h3>
+    <div class="detail-row">
+      <div class="detail-label">Current Location</div>
+      <div class="detail-value"><%= vessel.currentLocation || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Last Updated</div>
+      <div class="detail-value">
+        <% if (vessel.lastPositionUpdate) { %>
+          <%= new Date(vessel.lastPositionUpdate).toLocaleString() %>
+        <% } else { %>
+          N/A
+        <% } %>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Current Status</div>
+      <div class="detail-value"><%= vessel.operationalStatus || 'N/A' %></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">ETA Next Port</div>
+      <div class="detail-value">
+        <% if (vessel.eta) { %>
+          <%= new Date(vessel.eta).toLocaleString() %>
+        <% } else { %>
+          N/A
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent voyages -->
+  <div class="card full-width">
+    <h3>Recent Voyages</h3>
+    <% if (vessel.voyages && vessel.voyages.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Voyage ID</th>
+            <th>Load Port</th>
+            <th>Discharge Port</th>
+            <th>Cargo</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% vessel.voyages.forEach(voyage => { %>
+            <tr>
+              <td><%= voyage.id || 'N/A' %></td>
+              <td><%= voyage.loadPort || 'N/A' %></td>
+              <td><%= voyage.dischargePort || 'N/A' %></td>
+              <td><%= voyage.cargo || 'N/A' %></td>
+              <td>
+                <% if (voyage.startDate) { %>
+                  <%= new Date(voyage.startDate).toLocaleDateString() %>
+                <% } else { %>
+                  N/A
+                <% } %>
+              </td>
+              <td>
+                <% if (voyage.endDate) { %>
+                  <%= new Date(voyage.endDate).toLocaleDateString() %>
+                <% } else { %>
+                  N/A
+                <% } %>
+              </td>
+              <td><span class="status-badge <%= voyage.status %>"><%= voyage.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <div class="no-data">No voyage data available</div>
+    <% } %>
+  </div>
+
+  <!-- Notes -->
+  <div class="card full-width">
+    <h3>Notes</h3>
+    <% if (vessel.notes && vessel.notes.length > 0) { %>
+      <div class="notes-list">
+        <% vessel.notes.forEach(note => { %>
+          <div class="note-item">
+            <div class="note-header">
+              <div class="note-date">
+                <% if (note.date) { %>
+                  <%= new Date(note.date).toLocaleString() %>
+                <% } else { %>
+                  Unknown Date
+                <% } %>
+              </div>
+              <div class="note-author"><%= note.author || 'Unknown' %></div>
+            </div>
+            <div class="note-content"><%= note.content %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="no-data">No notes available</div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .vessel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .vessel-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .vessel-status.active {
+    background-color: #e6f7ed;
+    color: #0d904f;
+  }
+  
+  .vessel-status.inactive {
+    background-color: #fce8e8;
+    color: #d73a3a;
+  }
+  
+  .vessel-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .detail-row {
+    display: flex;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .detail-row:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .detail-label {
+    flex: 0 0 40%;
+    font-weight: 500;
+    color: #555;
+  }
+  
+  .detail-value {
+    flex: 0 0 60%;
+    font-weight: 400;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-badge.completed {
+    background-color: #e6f7ed;
+    color: #0d904f;
+  }
+  
+  .status-badge.in-progress {
+    background-color: #e6f0f9;
+    color: #0d66d0;
+  }
+  
+  .status-badge.planned {
+    background-color: #fff7e6;
+    color: #cc8800;
+  }
+  
+  .status-badge.cancelled {
+    background-color: #fce8e8;
+    color: #d73a3a;
+  }
+  
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .note-item {
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+  }
+  
+  .note-content {
+    white-space: pre-line;
+  }
+  
+  .no-data {
+    padding: 1.5rem;
+    text-align: center;
+    color: #666;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  @media (max-width: 768px) {
+    .vessel-detail-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style> 
